@@ -44,14 +44,12 @@ public class MainScript : MonoBehaviour
                 {
                     Debug.Log(hit.transform.name);
 
-                    if (hit.transform.gameObject.layer == 7)
+                    if (hit.transform.gameObject.layer == 7) //Gates, make wire
                     {
-                        userState = true;
                         StartCoroutine(MakeWireProcess(hit.transform.gameObject));
                     }
-                    else if (hit.transform.gameObject.layer == 8)
+                    else if (hit.transform.gameObject.layer == 8) //Gates, make wire
                     {
-                        userState = true;
                         StartCoroutine(MakeWireProcess(hit.transform.gameObject));
                     }
                 }
@@ -59,12 +57,15 @@ public class MainScript : MonoBehaviour
             else if (Input.GetMouseButtonDown(1)) {
                 RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
 
+                print("Clicked right");
+                print(hit.transform);
+
                 if (hit.collider != null)
                 {
                     userState = true;
                     Debug.Log(hit.transform.name);
 
-                    if (hit.transform.gameObject.layer == 6)
+                    if (hit.transform.gameObject.layer == 6) //Wire, delete
                     {
                         ClearWire(hit.transform.gameObject);
                     }
@@ -84,6 +85,10 @@ public class MainScript : MonoBehaviour
     
     void ClearWire(GameObject wire) {
         WireScript wireScript = wire.GetComponent<WireScript>();
+
+        wireScript.attachment1.GetComponent<BlockScript>().outputPorts.Remove(wire);
+        wireScript.attachment2.GetComponent<BlockScript>().outputPorts.Remove(wire);
+        Destroy(wire);
     }
     IEnumerator MakeWireProcess(GameObject port1)
     {
@@ -95,19 +100,18 @@ public class MainScript : MonoBehaviour
 
         if (port1.layer == 7)
         {
-            wireScript.attachment2 = port1;
+            wireScript.attachment2 = parentBlock;
             wire.transform.Find("Arrow").transform.eulerAngles = new Vector3(0, 0, 90);
             targetPortType = 8;
         }
         else
         {
-            wireScript.attachment1 = port1;
+            wireScript.attachment1 = parentBlock;
             wire.transform.Find("Arrow").transform.eulerAngles = new Vector3(0, 0, -90);
             targetPortType = 7;
         }
 
-        wireScript.attachment1 = port1;
-
+        userState = true;
 
         while (userState)
         {
@@ -123,11 +127,10 @@ public class MainScript : MonoBehaviour
                         BlockScript blockScript = hit.transform.parent.GetComponent<BlockScript>();
 
                         if (blockScript != null) {
-                            print("there a blc");
-                            if (targetPortType == 7 && blockScript.inputPorts.Contains(parentBlock)) {
+                            if (targetPortType == 7 && blockScript.inputPorts.ContainsValue(parentBlock)) {
                                 //nah
                             }
-                            else if (targetPortType == 8 && blockScript.outputPorts.Contains(parentBlock)) {
+                            else if (targetPortType == 8 && blockScript.outputPorts.ContainsValue(parentBlock)) {
                                 //nah
                             }
                             else {
@@ -146,15 +149,15 @@ public class MainScript : MonoBehaviour
                 {
                     if (targetPortType == 7)
                     {
-                        wireScript.attachment2 = potentialPort;
+                        wireScript.attachment2 = potentialPort.transform.parent.gameObject;
                     }
                     else
                     {
-                        wireScript.attachment1 = potentialPort;
+                        wireScript.attachment1 = potentialPort.transform.parent.gameObject;
                     }
 
-                    wireScript.attachment1.transform.parent.GetComponent<BlockScript>().outputPorts.Add(wireScript.attachment2.transform.parent.gameObject);
-                    wireScript.attachment2.transform.parent.GetComponent<BlockScript>().inputPorts.Add(wireScript.attachment1.transform.parent.gameObject);
+                    wireScript.attachment1.GetComponent<BlockScript>().outputPorts.Add(wire, wireScript.attachment2);
+                    wireScript.attachment2.GetComponent<BlockScript>().inputPorts.Add(wire, wireScript.attachment1);
                     break;
                 }
             }

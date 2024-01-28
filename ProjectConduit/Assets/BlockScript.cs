@@ -9,8 +9,8 @@ public class BlockScript : MonoBehaviour
     public int inputAmount;
     public int step;
 
-    public List<GameObject> inputPorts;
-    public List<GameObject> outputPorts;
+    public Dictionary<GameObject, GameObject> inputPorts = new Dictionary<GameObject, GameObject>();
+    public Dictionary<GameObject, GameObject> outputPorts = new Dictionary<GameObject, GameObject>();
 
     // Start is called before the first frame update
     void Start()
@@ -23,18 +23,18 @@ public class BlockScript : MonoBehaviour
         {
             bool result = AndGate();
 
-            foreach (GameObject wire in outputPorts)
+            foreach (KeyValuePair<GameObject, GameObject> pr in outputPorts)
             {
-                wire.GetComponent<WireScript>().powered = result;
+                pr.Key.GetComponent<WireScript>().powered = result;
             }
         }
     }
 
     bool AndGate()
     {
-        foreach (GameObject wire in inputPorts)
+        foreach (KeyValuePair<GameObject, GameObject> pr in inputPorts)
         {
-            if (!wire.GetComponent<WireScript>().powered)
+            if (!pr.Key.GetComponent<WireScript>().powered)
             {
                 return false;
                 break;
@@ -46,9 +46,9 @@ public class BlockScript : MonoBehaviour
 
     bool OrGate()
     {
-        foreach (GameObject wire in inputPorts)
+        foreach (KeyValuePair<GameObject, GameObject> pr in inputPorts)
         {
-            if (!wire.GetComponent<WireScript>().powered)
+            if (!pr.Key.GetComponent<WireScript>().powered)
             {
                 return true;
                 break;
