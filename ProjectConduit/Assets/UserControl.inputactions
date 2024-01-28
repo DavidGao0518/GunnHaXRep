@@ -33,9 +33,18 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "ChangeView",
+                    "name": "Run",
                     "type": "Button",
                     "id": "1592c56a-122f-4df3-a5c7-454041ebc402",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Step",
+                    "type": "Button",
+                    "id": "ec60853b-862c-447d-8cf4-c176eeea5ab6",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -211,11 +220,22 @@
                 {
                     "name": "",
                     "id": "e8bc03f4-1cc9-4a52-8036-925a322ec304",
-                    "path": "<Keyboard>/v",
+                    "path": "<Keyboard>/r",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "ChangeView",
+                    "action": "Run",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4f4b6c00-7f46-4a16-a1fa-cb5fb04983ca",
+                    "path": "<Keyboard>/f",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Step",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

@@ -18,7 +18,6 @@ public class CanvasControl : MonoBehaviour
     {
         
     }
-
     void WhenInputCommand(string cmd)
     {
         

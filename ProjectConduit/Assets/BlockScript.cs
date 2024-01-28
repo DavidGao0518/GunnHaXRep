@@ -6,8 +6,7 @@ using System;
 public class BlockScript : MonoBehaviour
 {
     //AND GATE
-    public int inputAmount;
-    public int step;
+    public int targetStep;
 
     public Dictionary<GameObject, GameObject> inputPorts = new Dictionary<GameObject, GameObject>();
     public Dictionary<GameObject, GameObject> outputPorts = new Dictionary<GameObject, GameObject>();
@@ -19,7 +18,7 @@ public class BlockScript : MonoBehaviour
     }
     void WhenStepped(int step)
     {
-        if (this.step == step && outputPorts != null)
+        if (this.targetStep == step && outputPorts != null)
         {
             bool result = AndGate();
 
