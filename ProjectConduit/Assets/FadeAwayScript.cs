@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class FadeAwayScript : MonoBehaviour
 {
-    public float fadeTime;
+    public float fadeTime = 255;
     private TextMeshProUGUI fadeAwayText;
 
     // Start is called before the first frame update
