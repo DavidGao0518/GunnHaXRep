@@ -42,16 +42,31 @@ public class MainScript : MonoBehaviour
 
                 if (hit.collider != null)
                 {
-                    userState = true;
                     Debug.Log(hit.transform.name);
 
                     if (hit.transform.gameObject.layer == 7)
                     {
+                        userState = true;
                         StartCoroutine(MakeWireProcess(hit.transform.gameObject));
                     }
                     else if (hit.transform.gameObject.layer == 8)
                     {
+                        userState = true;
                         StartCoroutine(MakeWireProcess(hit.transform.gameObject));
+                    }
+                }
+            }
+            else if (Input.GetMouseButtonDown(1)) {
+                RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+
+                if (hit.collider != null)
+                {
+                    userState = true;
+                    Debug.Log(hit.transform.name);
+
+                    if (hit.transform.gameObject.layer == 6)
+                    {
+                        ClearWire(hit.transform.gameObject);
                     }
                 }
             }
@@ -62,24 +77,32 @@ public class MainScript : MonoBehaviour
         wire.transform.position = start + (end - start) / 2;
         wire.transform.eulerAngles = new Vector3(0, 0, RadToDeg(math.atan2(end.y - start.y, end.x - start.x)));
         wire.transform.localScale = new Vector2((end - start).magnitude, wire.transform.localScale.y);
+
+        Transform arrow = wire.transform.Find("Arrow");
+        arrow.localScale = new Vector2(3, 0.3f / wire.transform.localScale.x);
     }
     
-
+    void ClearWire(GameObject wire) {
+        WireScript wireScript = wire.GetComponent<WireScript>();
+    }
     IEnumerator MakeWireProcess(GameObject port1)
     {
         GameObject wire = Instantiate(wireTemplate);
         WireScript wireScript = wire.GetComponent<WireScript>();
         GameObject potentialPort;
+        GameObject parentBlock = port1.transform.parent.gameObject;
         int targetPortType = 0;
 
         if (port1.layer == 7)
         {
-            wireScript.attachment1 = port1;
+            wireScript.attachment2 = port1;
+            wire.transform.Find("Arrow").transform.eulerAngles = new Vector3(0, 0, 90);
             targetPortType = 8;
         }
         else
         {
-            wireScript.attachment2 = port1;
+            wireScript.attachment1 = port1;
+            wire.transform.Find("Arrow").transform.eulerAngles = new Vector3(0, 0, -90);
             targetPortType = 7;
         }
 
@@ -88,6 +111,7 @@ public class MainScript : MonoBehaviour
 
         while (userState)
         {
+            yield return null;
             potentialPort = null;
             RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
             if (hit.collider != null)
@@ -96,7 +120,20 @@ public class MainScript : MonoBehaviour
                 {
                     if (hit.transform.parent != port1.transform.parent)
                     {
-                        potentialPort = hit.transform.gameObject;
+                        BlockScript blockScript = hit.transform.parent.GetComponent<BlockScript>();
+
+                        if (blockScript != null) {
+                            print("there a blc");
+                            if (targetPortType == 7 && blockScript.inputPorts.Contains(parentBlock)) {
+                                //nah
+                            }
+                            else if (targetPortType == 8 && blockScript.outputPorts.Contains(parentBlock)) {
+                                //nah
+                            }
+                            else {
+                                potentialPort = hit.transform.gameObject;
+                            }
+                        }
                     }
                 }
             }
@@ -109,21 +146,28 @@ public class MainScript : MonoBehaviour
                 {
                     if (targetPortType == 7)
                     {
-                        wireScript.attachment1 = potentialPort;
+                        wireScript.attachment2 = potentialPort;
                     }
                     else
                     {
-                        wireScript.attachment2 = potentialPort;
+                        wireScript.attachment1 = potentialPort;
                     }
+
+                    wireScript.attachment1.transform.parent.GetComponent<BlockScript>().outputPorts.Add(wire);
+                    wireScript.attachment2.transform.parent.GetComponent<BlockScript>().inputPorts.Add(wire);
                     break;
                 }
             }
             else
             {
                 RenderWire(wire, port1.transform.position, Camera.main.ScreenToWorldPoint(Input.mousePosition));
-            }
 
-            yield return null;
+                if (Input.GetMouseButtonDown(0))
+                {
+                    Destroy(wire);
+                    break;
+                }
+            }
         }
 
         userState = false;

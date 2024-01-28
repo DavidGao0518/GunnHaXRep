@@ -10,7 +10,7 @@ public class BlockScript : MonoBehaviour
     public int step;
 
     public List<GameObject> inputPorts;
-    public GameObject outputPort;
+    public List<GameObject> outputPorts;
 
     // Start is called before the first frame update
     void Start()
@@ -20,7 +20,7 @@ public class BlockScript : MonoBehaviour
 
     void WhenStepped(int step)
     {
-        if (this.step == step && outputPort != null)
+        if (this.step == step && outputPorts != null)
         {
             bool result = true;
 
@@ -33,7 +33,10 @@ public class BlockScript : MonoBehaviour
                 }
             }
 
-            outputPort.GetComponent<WireScript>().powered = result;
+            foreach (GameObject wire in outputPorts)
+            {
+                wire.GetComponent<WireScript>().powered = result;
+            }
         }
     }
 }
