@@ -17,26 +17,44 @@ public class BlockScript : MonoBehaviour
     {
         MainScript.Stepped += WhenStepped;
     }
-
     void WhenStepped(int step)
     {
         if (this.step == step && outputPorts != null)
         {
-            bool result = true;
-
-            foreach (GameObject wire in inputPorts)
-            {
-                if (!wire.GetComponent<WireScript>().powered)
-                {
-                    result = false;
-                    break;
-                }
-            }
+            bool result = AndGate();
 
             foreach (GameObject wire in outputPorts)
             {
                 wire.GetComponent<WireScript>().powered = result;
             }
         }
+    }
+
+    bool AndGate()
+    {
+        foreach (GameObject wire in inputPorts)
+        {
+            if (!wire.GetComponent<WireScript>().powered)
+            {
+                return false;
+                break;
+            }
+        }
+
+        return true;
+    }
+
+    bool OrGate()
+    {
+        foreach (GameObject wire in inputPorts)
+        {
+            if (!wire.GetComponent<WireScript>().powered)
+            {
+                return true;
+                break;
+            }
+        }
+
+        return false;
     }
 }
