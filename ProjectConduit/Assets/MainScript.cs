@@ -7,7 +7,9 @@ using Unity.Mathematics;
 public class MainScript : MonoBehaviour
 {
     public static event Action<int> Stepped;
+    public static event Action<string> InputCommand;
     public GameObject wireTemplate;
+    public List<GameObject> blockList;
 
     public bool userState = false;
 
@@ -24,7 +26,7 @@ public class MainScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        InputCommand += WhenSelfInputCommand;
     }
 
 
@@ -52,6 +54,10 @@ public class MainScript : MonoBehaviour
                     {
                         StartCoroutine(MakeWireProcess(hit.transform.gameObject));
                     }
+                    else if (hit.transform.gameObject.layer == 9) //Blocks, edit block
+                    {
+                        StartCoroutine(MakeWireProcess(hit.transform.gameObject));
+                    }
                 }
             }
             else if (Input.GetMouseButtonDown(1)) {
@@ -62,7 +68,6 @@ public class MainScript : MonoBehaviour
 
                 if (hit.collider != null)
                 {
-                    userState = true;
                     Debug.Log(hit.transform.name);
 
                     if (hit.transform.gameObject.layer == 6) //Wire, delete
@@ -73,6 +78,20 @@ public class MainScript : MonoBehaviour
             }
         }
     }
+
+    //Events:
+
+    void WhenSelfInputCommand(string cmd)
+    {
+        if (cmd == "BuildBlock")
+        {
+
+        }
+    }
+
+
+
+    //Actual functions:
     void RenderWire(GameObject wire, Vector2 start, Vector2 end)
     {
         wire.transform.position = start + (end - start) / 2;
@@ -87,7 +106,7 @@ public class MainScript : MonoBehaviour
         WireScript wireScript = wire.GetComponent<WireScript>();
 
         wireScript.attachment1.GetComponent<BlockScript>().outputPorts.Remove(wire);
-        wireScript.attachment2.GetComponent<BlockScript>().outputPorts.Remove(wire);
+        wireScript.attachment2.GetComponent<BlockScript>().inputPorts.Remove(wire);
         Destroy(wire);
     }
     IEnumerator MakeWireProcess(GameObject port1)
@@ -171,6 +190,22 @@ public class MainScript : MonoBehaviour
                     break;
                 }
             }
+        }
+
+        userState = false;
+    }
+    void ClearBlock(GameObject block)
+    {
+        //to do
+    }
+    IEnumerator MakeBlockProcess(GameObject blockTemplate)
+    {
+        userState = true;
+
+        while (userState)
+        {
+            yield return null;
+            break;
         }
 
         userState = false;

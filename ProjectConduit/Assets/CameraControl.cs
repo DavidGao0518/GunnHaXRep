@@ -41,9 +41,4 @@ public class CameraControl : MonoBehaviour
     {
         zoomInputs = action.Get<float>();
     }
-
-    void OnMouseMove(InputValue action)
-    {
-        float test = action.Get<float>();
-    }
 }
