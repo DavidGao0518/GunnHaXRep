@@ -7,6 +7,7 @@ public class BlockScript : MonoBehaviour
 {
     //AND GATE
     public int targetStep;
+    public int blockType;
 
     public Dictionary<GameObject, GameObject> inputPorts = new Dictionary<GameObject, GameObject>();
     public Dictionary<GameObject, GameObject> outputPorts = new Dictionary<GameObject, GameObject>();
@@ -16,9 +17,9 @@ public class BlockScript : MonoBehaviour
     {
         MainScript.Stepped += WhenStepped;
     }
-    void WhenStepped(int step)
+    void WhenStepped(GameObject Block)
     {
-        if (this.targetStep == step && outputPorts != null)
+        if (this.gameObject == Block)
         {
             bool result = AndGate();
 

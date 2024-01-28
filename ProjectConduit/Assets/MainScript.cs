@@ -7,7 +7,7 @@ using Unity.Mathematics;
 
 public class MainScript : MonoBehaviour
 {
-    public static event Action<int> Stepped;
+    public static event Action<GameObject> Stepped;
     public GameObject wireTemplate;
     public List<GameObject> blockList;
     public Canvas canvas;
@@ -17,6 +17,10 @@ public class MainScript : MonoBehaviour
 
     public GameObject wireFolder;
     public GameObject blockFolder;
+
+    public List<GameObject> lastBlocks = new List<GameObject>();
+    public List<GameObject> nextBlocks = new List<GameObject>();
+
     public GameObject stepIndicatorTemplate;
     public List<GameObject> stepIndicator;
 
@@ -134,47 +138,78 @@ public class MainScript : MonoBehaviour
 
         List<GameObject> allBlocks = new List<GameObject>();
         bool running = true;
+        bool error = true;
 
         for (int i = 0; i < blockFolder.transform.childCount; i++)
         {
             allBlocks.Add(blockFolder.transform.GetChild(i).gameObject);
         }
 
-        while (running)
+        foreach (GameObject block in allBlocks)
         {
-            yield return null;
-            bool reachEnd = true;
+            BlockScript blockScript = block.GetComponent<BlockScript>();
 
-            Stepped?.Invoke(step);
-
-            foreach (GameObject block in allBlocks)
+            if (blockScript.targetStep == 1)
             {
-                BlockScript blockScript = block.GetComponent<BlockScript>();
-
-                if (blockScript.targetStep == step)
-                {
-                    reachEnd = false;
-                    break;
-                }
-
+                error = false;
+                nextBlocks.Add(block);
             }
 
-            if (reachEnd)
-            {
-                break;
-            }
+        }
 
-            step++;
+        if (error)
+        {
+            print("Bad circult");
+        }
+        else
+        {
+            while (running)
+            {
+                yield return null;
+
+                running = !OnStep();
+            }
         }
 
         print("Run finished");
         userState = true;
     }
 
-    void OnStep(InputValue action)
+    bool OnStep()
     {
+        List<GameObject> allBlocks = new List<GameObject>();
+        bool atEnd = true;
+
+        //Clean up and initialize
+
+        for (int i = 0; i < blockFolder.transform.childCount; i++)
+        {
+            allBlocks.Add(blockFolder.transform.GetChild(i).gameObject);
+        }
+
+
+        //Do work
+
+        lastBlocks = nextBlocks;
+        nextBlocks = new List<GameObject>();
+
+        foreach (GameObject block in lastBlocks)
+        {
+            BlockScript blockScript = block.GetComponent<BlockScript>();
+            Stepped?.Invoke(block);
+
+            if (blockScript.targetStep == step)
+            {
+                atEnd = false;
+                nextBlocks.AddRange(blockScript.outputPorts.Values);
+            }
+
+        }
 
         print("STEP");
+        step++;
+
+        return atEnd;
     }
 
 

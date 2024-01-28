@@ -16,17 +16,13 @@ public class WireScript : MonoBehaviour
     void Start()
     {
         render = transform.GetComponent<SpriteRenderer>();
-        MainScript.Stepped += WhenStepped;
+        //MainScript.Stepped += WhenStepped;
     }
 
     // Update is called once per frame
     void Update()
     {
         
-    }
-    void WhenStepped(int step)
-    {
-
     }
 
 }
