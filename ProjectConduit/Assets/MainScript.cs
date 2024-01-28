@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using System;
 using Unity.Mathematics;
+using TMPro;
 
 public class MainScript : MonoBehaviour
 {
@@ -15,6 +16,7 @@ public class MainScript : MonoBehaviour
 
     public bool userState = false;
     public bool UIState = false;
+    public bool running;
 
     public GameObject wireFolder;
     public GameObject blockFolder;
@@ -25,6 +27,8 @@ public class MainScript : MonoBehaviour
 
     public GameObject stepIndicatorTemplate;
     public List<GameObject> stepIndicators;
+
+    public TextMeshProUGUI statusText;
 
     public int step = 1;
 
@@ -117,6 +121,7 @@ public class MainScript : MonoBehaviour
     void OnClear()
     {
         print("Reset circult");
+        statusText.text = "Status: Cleared";
         ResetCircult();
     }
     void ResetCircult()
@@ -170,7 +175,6 @@ public class MainScript : MonoBehaviour
         print("Run");
 
         userState = false;
-        bool running = true;
 
         if (nextBlocks.Count == 0)
         {
@@ -178,6 +182,7 @@ public class MainScript : MonoBehaviour
         }
         else
         {
+            running = true;
             while (running)
             {
                 yield return null;
@@ -186,6 +191,7 @@ public class MainScript : MonoBehaviour
         }
 
         print("Run finished");
+        step = 1;
         userState = true;
     }
 
@@ -222,7 +228,7 @@ public class MainScript : MonoBehaviour
             GameObject indicator = Instantiate(stepIndicatorTemplate);
             indicator.transform.parent = indicatorFolder.transform;
             stepIndicators.Add(indicator);
-            indicator.transform.position = block.transform.position;
+            indicator.transform.position = block.transform.position + new Vector3(0, 1.5f, 0);
 
             nextBlocks.AddRange(blockScript.outputPorts.Values);
 
@@ -230,11 +236,18 @@ public class MainScript : MonoBehaviour
 
         UpdateState.Invoke(false);
         print("STEP" + step);
-        step++;
 
+        statusText.text = "Status: Running Increment, Current Step: " + step;
         if (atEnd)
         {
+            statusText.text = "Status: Finished, Total Step: " + (step - 1);
+        }
+        step++;
+
+        if (atEnd && !running)
+        {
             ResetCircult();
+            statusText.text = "Status: Cleared";
         }
 
         return atEnd;

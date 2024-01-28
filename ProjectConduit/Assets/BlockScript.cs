@@ -7,6 +7,7 @@ public class BlockScript : MonoBehaviour
 {
     //AND GATE
     public int blockType;
+    private GameObject light;
 
     public Dictionary<GameObject, GameObject> inputPorts = new Dictionary<GameObject, GameObject>();
     public Dictionary<GameObject, GameObject> outputPorts = new Dictionary<GameObject, GameObject>();
@@ -14,6 +15,12 @@ public class BlockScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        if (blockType == 1)
+        {
+            light = transform.Find("Light").gameObject;
+            MainScript.UpdateState += onUpdateState;
+        }
+
         MainScript.Stepped += WhenStepped;
     }
     void WhenStepped(GameObject Block)
@@ -28,7 +35,7 @@ public class BlockScript : MonoBehaviour
             }
             else if (blockType == 1) //Output block
             {
-                //what?
+                OutputBlock();
             }
             else if (blockType == 2) //and gate
             {
@@ -37,6 +44,10 @@ public class BlockScript : MonoBehaviour
             else if (blockType == 3) //or gate
             {
                 result = OrGate();
+            }
+            else if (blockType == 4) //or gate
+            {
+                result = NotGate();
             }
             else
             {
@@ -51,13 +62,32 @@ public class BlockScript : MonoBehaviour
         }
     }
 
+    void onUpdateState(bool placeholder)
+    {
 
+       if (blockType == 1)
+       {
+            print("RESETLIGHT");
+            OutputBlock();
+       }
+    }
 
     //Block functions:
 
-    bool StartBlock()
+    void OutputBlock()
     {
-        return true;
+        bool result = false;
+        foreach (KeyValuePair<GameObject, GameObject> pr in inputPorts)
+        {
+            if (pr.Key.GetComponent<WireScript>().powered)
+            {
+                print("LightPowered");
+                result = true;
+                break;
+            }
+        }
+
+        light.SetActive(result);
     }
     bool AndGate()
     {
@@ -77,7 +107,7 @@ public class BlockScript : MonoBehaviour
     {
         foreach (KeyValuePair<GameObject, GameObject> pr in inputPorts)
         {
-            if (!pr.Key.GetComponent<WireScript>().powered)
+            if (pr.Key.GetComponent<WireScript>().powered)
             {
                 return true;
                 break;
@@ -85,5 +115,16 @@ public class BlockScript : MonoBehaviour
         }
 
         return false;
+    }
+
+    bool NotGate()
+    {
+        bool answer = false;
+        foreach (KeyValuePair<GameObject, GameObject> pr in inputPorts)
+        {
+            answer = pr.Key.GetComponent<WireScript>().powered;
+        }
+
+        return !answer;
     }
 }
