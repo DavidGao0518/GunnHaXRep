@@ -1,16 +1,32 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using System;
 using Unity.Mathematics;
 
 public class MainScript : MonoBehaviour
 {
-    public static event Action<int> Stepped;
+    public static event Action<GameObject> Stepped;
+    public static event Action<bool> UpdateState;
     public GameObject wireTemplate;
     public List<GameObject> blockList;
+    public Canvas canvas;
 
     public bool userState = false;
+    public bool UIState = false;
+
+    public GameObject wireFolder;
+    public GameObject blockFolder;
+    public GameObject indicatorFolder;
+
+    public List<GameObject> lastBlocks = new List<GameObject>();
+    public List<GameObject> nextBlocks = new List<GameObject>();
+
+    public GameObject stepIndicatorTemplate;
+    public List<GameObject> stepIndicators;
+
+    public int step = 1;
 
     float RadToDeg(float input)
     {
@@ -28,50 +44,64 @@ public class MainScript : MonoBehaviour
         BuildButtonBehavior.BuildBlockCommand += WhenBuildCommand;
     }
 
-
-
     // Update is called once per frame
     void Update()
     {
-        if (!userState)
+        if (!userState) //Is actually doing something
         {
-            if (Input.GetMouseButtonDown(0))
+            RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+
+            if (hit.collider != null)
             {
-                print("Clicked");
+                UIState = hit.collider.gameObject.transform.IsChildOf(canvas.transform);
+            }
 
-                RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+            if (UIState) //Interacting with UI
+            {
 
-                if (hit.collider != null)
+            }
+            else //Interacting with world
+            {
+                if (Input.GetMouseButtonDown(0))
                 {
-                    Debug.Log(hit.transform.name);
+                    print("Clicked");
 
-                    if (hit.transform.gameObject.layer == 7) //Gates, make wire
+                    if (hit.collider != null)
                     {
-                        StartCoroutine(MakeWireProcess(hit.transform.gameObject));
-                    }
-                    else if (hit.transform.gameObject.layer == 8) //Gates, make wire
-                    {
-                        StartCoroutine(MakeWireProcess(hit.transform.gameObject));
-                    }
-                    else if (hit.transform.gameObject.layer == 9) //Blocks, edit block
-                    {
-                        StartCoroutine(MakeWireProcess(hit.transform.gameObject));
+                        Debug.Log(hit.transform.name);
+
+                        if (hit.transform.gameObject.layer == 7) //Gates, make wire
+                        {
+                            StartCoroutine(MakeWireProcess(hit.transform.gameObject));
+                        }
+                        else if (hit.transform.gameObject.layer == 8) //Gates, make wire
+                        {
+                            StartCoroutine(MakeWireProcess(hit.transform.gameObject));
+                        }
+                        else if (hit.transform.gameObject.layer == 9) //Blocks, edit block
+                        {
+                            StartCoroutine(MakeWireProcess(hit.transform.gameObject));
+                        }
                     }
                 }
-            }
-            else if (Input.GetMouseButtonDown(1)) {
-                RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-
-                print("Clicked right");
-                print(hit.transform);
-
-                if (hit.collider != null)
+                else if (Input.GetMouseButtonDown(1))
                 {
-                    Debug.Log(hit.transform.name);
 
-                    if (hit.transform.gameObject.layer == 6) //Wire, delete
+                    print("Clicked right");
+                    print(hit.transform);
+
+                    if (hit.collider != null)
                     {
-                        ClearWire(hit.transform.gameObject);
+                        Debug.Log(hit.transform.name);
+
+                        if (hit.transform.gameObject.layer == 6) //Wire, delete
+                        {
+                            ClearWire(hit.transform.gameObject);
+                        }
+                        else if (hit.transform.gameObject.layer == 9) //Blocks, delete
+                        {
+
+                        }
                     }
                 }
             }
@@ -82,6 +112,132 @@ public class MainScript : MonoBehaviour
     void WhenBuildCommand(GameObject targetBlock)
     {
         StartCoroutine(MakeBlockProcess(targetBlock));
+    }
+
+    void OnClear()
+    {
+        print("Reset circult");
+        ResetCircult();
+    }
+    void ResetCircult()
+    {
+        step = 1;
+        nextBlocks = new List<GameObject>();
+
+        List<GameObject> allWires = new List<GameObject>();
+
+        List<GameObject> allBlocks = new List<GameObject>();
+        bool running = true;
+        
+        //Clear indicators
+        foreach (GameObject indicator in stepIndicators)
+        {
+            Destroy(indicator);
+        }
+        stepIndicators = new List<GameObject>();
+
+        //Allblock list
+        for (int i = 0; i < blockFolder.transform.childCount; i++)
+        {
+            allBlocks.Add(blockFolder.transform.GetChild(i).gameObject);
+        }
+        for (int i = 0; i < wireFolder.transform.childCount; i++)
+        {
+            allWires.Add(wireFolder.transform.GetChild(i).gameObject);
+        }
+
+        //Allwire list
+        foreach (GameObject wire in allWires)
+        {
+            wire.GetComponent<WireScript>().powered = false;
+        }
+        foreach (GameObject block in allBlocks)
+        {
+            BlockScript blockScript = block.GetComponent<BlockScript>();
+
+            if (blockScript.blockType == 0)
+            {
+                nextBlocks.Add(block);
+            }
+
+        }
+
+        UpdateState.Invoke(false);
+    }
+    IEnumerator OnRun(InputValue action)
+    {
+        ResetCircult();
+        print("Run");
+
+        userState = false;
+        bool running = true;
+
+        if (nextBlocks.Count == 0)
+        {
+            print("Bad circult, no start blocks?");
+        }
+        else
+        {
+            while (running)
+            {
+                yield return null;
+                running = !OnStep();
+            }
+        }
+
+        print("Run finished");
+        userState = true;
+    }
+
+    bool OnStep()
+    {
+        List<GameObject> allBlocks = new List<GameObject>();
+        bool atEnd = true;
+
+        //Clean up and initialize
+
+        for (int i = 0; i < blockFolder.transform.childCount; i++)
+        {
+            allBlocks.Add(blockFolder.transform.GetChild(i).gameObject);
+        }
+
+        foreach (GameObject indicator in stepIndicators)
+        {
+            Destroy(indicator);
+        }
+        stepIndicators = new List<GameObject>();
+
+        //Do work
+
+        lastBlocks = nextBlocks;
+        nextBlocks = new List<GameObject>();
+
+        foreach (GameObject block in lastBlocks)
+        {
+            BlockScript blockScript = block.GetComponent<BlockScript>();
+            Stepped?.Invoke(block);
+
+            atEnd = false;
+
+            GameObject indicator = Instantiate(stepIndicatorTemplate);
+            indicator.transform.parent = indicatorFolder.transform;
+            stepIndicators.Add(indicator);
+            indicator.transform.position = block.transform.position;
+
+            nextBlocks.AddRange(blockScript.outputPorts.Values);
+
+        }
+
+        UpdateState.Invoke(false);
+        print("STEP" + step);
+        step++;
+
+        if (atEnd)
+        {
+            ResetCircult();
+        }
+
+        return atEnd;
     }
 
 
@@ -111,6 +267,8 @@ public class MainScript : MonoBehaviour
         GameObject potentialPort;
         GameObject parentBlock = port1.transform.parent.gameObject;
         int targetPortType = 0;
+
+        wire.transform.parent = wireFolder.transform;
 
         if (port1.layer == 7)
         {
@@ -159,7 +317,7 @@ public class MainScript : MonoBehaviour
             {
                 RenderWire(wire, port1.transform.position, potentialPort.transform.position);
 
-                if (Input.GetMouseButtonDown(0))
+                if (Input.GetMouseButtonDown(0) && !UIState)
                 {
                     if (targetPortType == 7)
                     {
@@ -195,14 +353,27 @@ public class MainScript : MonoBehaviour
     }
     IEnumerator MakeBlockProcess(GameObject blockTemplate)
     {
+        GameObject block = Instantiate(blockTemplate);
+        block.name = blockTemplate.name;
+
+        block.transform.parent = blockFolder.transform;
+
         userState = true;
+        canvas.gameObject.SetActive(false);
 
         while (userState)
         {
             yield return null;
-            break;
+            Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            block.transform.position = new Vector3(mousePos.x, mousePos.y, 0);
+
+            if (Input.GetMouseButtonDown(0) && !UIState)
+            {
+                break;
+            }
         }
 
+        canvas.gameObject.SetActive(true);
         userState = false;
     }
 }

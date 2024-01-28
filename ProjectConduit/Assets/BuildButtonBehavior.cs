@@ -10,6 +10,7 @@ public class BuildButtonBehavior : MonoBehaviour
 
     public void WhenClicked()
     {
+        print("Build bloc");
         BuildBlockCommand?.Invoke(blockTemplate);
     }
 }

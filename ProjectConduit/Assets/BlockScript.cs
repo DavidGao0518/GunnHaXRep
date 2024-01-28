@@ -6,8 +6,7 @@ using System;
 public class BlockScript : MonoBehaviour
 {
     //AND GATE
-    public int inputAmount;
-    public int step;
+    public int blockType;
 
     public Dictionary<GameObject, GameObject> inputPorts = new Dictionary<GameObject, GameObject>();
     public Dictionary<GameObject, GameObject> outputPorts = new Dictionary<GameObject, GameObject>();
@@ -17,11 +16,33 @@ public class BlockScript : MonoBehaviour
     {
         MainScript.Stepped += WhenStepped;
     }
-    void WhenStepped(int step)
+    void WhenStepped(GameObject Block)
     {
-        if (this.step == step && outputPorts != null)
+        if (this.gameObject == Block)
         {
-            bool result = AndGate();
+            bool result = false;
+
+            if (blockType == 0) //Start block
+            {
+                result = true;
+            }
+            else if (blockType == 1) //Output block
+            {
+                //what?
+            }
+            else if (blockType == 2) //and gate
+            {
+                result = AndGate();
+            }
+            else if (blockType == 3) //or gate
+            {
+                result = OrGate();
+            }
+            else
+            {
+                //undefined block
+                print("Undefined block");
+            }
 
             foreach (KeyValuePair<GameObject, GameObject> pr in outputPorts)
             {
@@ -30,6 +51,14 @@ public class BlockScript : MonoBehaviour
         }
     }
 
+
+
+    //Block functions:
+
+    bool StartBlock()
+    {
+        return true;
+    }
     bool AndGate()
     {
         foreach (KeyValuePair<GameObject, GameObject> pr in inputPorts)
