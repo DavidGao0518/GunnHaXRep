@@ -682,15 +682,17 @@ MonoBehaviour:
   blockList:
   - {fileID: 645538854}
   - {fileID: 875607815}
+  - {fileID: 1630607221}
   canvas: {fileID: 1831044486}
   userState: 0
   UIState: 0
   wireFolder: {fileID: 106211338}
   blockFolder: {fileID: 1316737918}
+  indicatorFolder: {fileID: 1811982427}
   lastBlocks: []
   nextBlocks: []
   stepIndicatorTemplate: {fileID: 1095407038}
-  stepIndicator: []
+  stepIndicators: []
   step: 0
 --- !u!1 &619394800
 GameObject:
@@ -1600,7 +1602,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1095407038}
   m_LocalRotation: {x: 0, y: 0, z: -1, w: 0}
-  m_LocalPosition: {x: -4.36, y: -1.44, z: 0}
+  m_LocalPosition: {x: -4.36, y: -1.44, z: -2}
   m_LocalScale: {x: 2, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3048,6 +3050,37 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &1811982427
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1811982428}
+  m_Layer: 0
+  m_Name: IndicatorFolder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1811982428
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1811982427}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 12
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1831044483
 GameObject:
   m_ObjectHideFlags: 0

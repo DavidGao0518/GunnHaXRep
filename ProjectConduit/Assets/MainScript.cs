@@ -17,14 +17,15 @@ public class MainScript : MonoBehaviour
 
     public GameObject wireFolder;
     public GameObject blockFolder;
+    public GameObject indicatorFolder;
 
     public List<GameObject> lastBlocks = new List<GameObject>();
     public List<GameObject> nextBlocks = new List<GameObject>();
 
     public GameObject stepIndicatorTemplate;
-    public List<GameObject> stepIndicator;
+    public List<GameObject> stepIndicators;
 
-    public int step = 0;
+    public int step = 1;
 
     float RadToDeg(float input)
     {
@@ -113,10 +114,24 @@ public class MainScript : MonoBehaviour
     {
         StartCoroutine(MakeBlockProcess(targetBlock));
     }
+
+    void OnClear()
+    {
+        print("Reset circult");
+        ResetCircult();
+    }
     void ResetCircult()
     {
+        step = 1;
         List<GameObject> allWires = new List<GameObject>();
+
+        List<GameObject> allBlocks = new List<GameObject>();
         bool running = true;
+
+        for (int i = 0; i < blockFolder.transform.childCount; i++)
+        {
+            allBlocks.Add(blockFolder.transform.GetChild(i).gameObject);
+        }
 
         for (int i = 0; i < wireFolder.transform.childCount; i++)
         {
@@ -127,46 +142,35 @@ public class MainScript : MonoBehaviour
         {
             wire.GetComponent<WireScript>().powered = false;
         }
-    }
-    IEnumerator OnRun(InputValue action)
-    {
-        step = 1;
-        ResetCircult();
-        print("Run");
-
-        userState = false;
-
-        List<GameObject> allBlocks = new List<GameObject>();
-        bool running = true;
-        bool error = true;
-
-        for (int i = 0; i < blockFolder.transform.childCount; i++)
-        {
-            allBlocks.Add(blockFolder.transform.GetChild(i).gameObject);
-        }
 
         foreach (GameObject block in allBlocks)
         {
             BlockScript blockScript = block.GetComponent<BlockScript>();
 
-            if (blockScript.targetStep == 1)
+            if (blockScript.blockType == 0)
             {
-                error = false;
                 nextBlocks.Add(block);
             }
 
         }
+    }
+    IEnumerator OnRun(InputValue action)
+    {
+        ResetCircult();
+        print("Run");
 
-        if (error)
+        userState = false;
+        bool running = true;
+
+        if (nextBlocks.Count == 0)
         {
-            print("Bad circult");
+            print("Bad circult, no start blocks?");
         }
         else
         {
             while (running)
             {
                 yield return null;
-
                 running = !OnStep();
             }
         }
@@ -187,6 +191,11 @@ public class MainScript : MonoBehaviour
             allBlocks.Add(blockFolder.transform.GetChild(i).gameObject);
         }
 
+        foreach (GameObject indicator in stepIndicators)
+        {
+            Destroy(indicator);
+        }
+        stepIndicators = new List<GameObject>();
 
         //Do work
 
@@ -198,16 +207,24 @@ public class MainScript : MonoBehaviour
             BlockScript blockScript = block.GetComponent<BlockScript>();
             Stepped?.Invoke(block);
 
-            if (blockScript.targetStep == step)
-            {
-                atEnd = false;
-                nextBlocks.AddRange(blockScript.outputPorts.Values);
-            }
+            atEnd = false;
+
+            GameObject indicator = Instantiate(stepIndicatorTemplate);
+            indicator.transform.parent = indicatorFolder.transform;
+            stepIndicators.Add(indicator);
+            indicator.transform.position = block.transform.position;
+
+            nextBlocks.AddRange(blockScript.outputPorts.Values);
 
         }
 
-        print("STEP");
+        print("STEP" + step);
         step++;
+
+        if (atEnd)
+        {
+            ResetCircult();
+        }
 
         return atEnd;
     }
