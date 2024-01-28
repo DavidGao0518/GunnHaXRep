@@ -8,6 +8,7 @@ using Unity.Mathematics;
 public class MainScript : MonoBehaviour
 {
     public static event Action<GameObject> Stepped;
+    public static event Action<bool> UpdateState;
     public GameObject wireTemplate;
     public List<GameObject> blockList;
     public Canvas canvas;
@@ -42,8 +43,6 @@ public class MainScript : MonoBehaviour
     {
         BuildButtonBehavior.BuildBlockCommand += WhenBuildCommand;
     }
-
-
 
     // Update is called once per frame
     void Update()
@@ -123,26 +122,35 @@ public class MainScript : MonoBehaviour
     void ResetCircult()
     {
         step = 1;
+        nextBlocks = new List<GameObject>();
+
         List<GameObject> allWires = new List<GameObject>();
 
         List<GameObject> allBlocks = new List<GameObject>();
         bool running = true;
+        
+        //Clear indicators
+        foreach (GameObject indicator in stepIndicators)
+        {
+            Destroy(indicator);
+        }
+        stepIndicators = new List<GameObject>();
 
+        //Allblock list
         for (int i = 0; i < blockFolder.transform.childCount; i++)
         {
             allBlocks.Add(blockFolder.transform.GetChild(i).gameObject);
         }
-
         for (int i = 0; i < wireFolder.transform.childCount; i++)
         {
             allWires.Add(wireFolder.transform.GetChild(i).gameObject);
         }
 
+        //Allwire list
         foreach (GameObject wire in allWires)
         {
             wire.GetComponent<WireScript>().powered = false;
         }
-
         foreach (GameObject block in allBlocks)
         {
             BlockScript blockScript = block.GetComponent<BlockScript>();
@@ -153,6 +161,8 @@ public class MainScript : MonoBehaviour
             }
 
         }
+
+        UpdateState.Invoke(false);
     }
     IEnumerator OnRun(InputValue action)
     {
@@ -218,6 +228,7 @@ public class MainScript : MonoBehaviour
 
         }
 
+        UpdateState.Invoke(false);
         print("STEP" + step);
         step++;
 

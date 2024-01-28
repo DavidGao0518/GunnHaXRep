@@ -16,13 +16,25 @@ public class WireScript : MonoBehaviour
     void Start()
     {
         render = transform.GetComponent<SpriteRenderer>();
-        //MainScript.Stepped += WhenStepped;
+        MainScript.UpdateState += onUpdateState;
     }
 
     // Update is called once per frame
     void Update()
     {
         
+    }
+
+    void onUpdateState(bool placeholder)
+    {
+        if (powered)
+        {
+            render.color = enabledColor;
+        }
+        else
+        {
+            render.color = disabledColor;
+        }
     }
 
 }

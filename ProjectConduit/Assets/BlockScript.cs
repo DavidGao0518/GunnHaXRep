@@ -6,7 +6,6 @@ using System;
 public class BlockScript : MonoBehaviour
 {
     //AND GATE
-    public int targetStep;
     public int blockType;
 
     public Dictionary<GameObject, GameObject> inputPorts = new Dictionary<GameObject, GameObject>();
