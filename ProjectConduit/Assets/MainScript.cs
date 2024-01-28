@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using Unity.Mathematics;
 
 public class MainScript : MonoBehaviour
 {
@@ -10,12 +11,22 @@ public class MainScript : MonoBehaviour
 
     public bool userState = false;
 
+    float RadToDeg(float input)
+    {
+        return input * 180 / math.PI;
+    }
+    float DegToRad(float input)
+    {
+        return input / 180 * math.PI;
+    }
+
 
     // Start is called before the first frame update
     void Start()
     {
         
     }
+
 
 
     // Update is called once per frame
@@ -36,11 +47,11 @@ public class MainScript : MonoBehaviour
 
                     if (hit.transform.gameObject.layer == 7)
                     {
-                        StartCoroutine(MakeWire(hit.transform.gameObject, 8));
+                        StartCoroutine(MakeWireProcess(hit.transform.gameObject));
                     }
                     else if (hit.transform.gameObject.layer == 8)
                     {
-                        StartCoroutine(MakeWire(hit.transform.gameObject, 7));
+                        StartCoroutine(MakeWireProcess(hit.transform.gameObject));
                     }
                 }
             }
@@ -49,15 +60,28 @@ public class MainScript : MonoBehaviour
     void RenderWire(GameObject wire, Vector2 start, Vector2 end)
     {
         wire.transform.position = start + (end - start) / 2;
-        wire.transform.eulerAngles = new Vector3(0, 0, Math.Atan2(end.y - start.y, end.x - start.x));
+        wire.transform.eulerAngles = new Vector3(0, 0, RadToDeg(math.atan2(end.y - start.y, end.x - start.x)));
         wire.transform.localScale = new Vector2((end - start).magnitude, wire.transform.localScale.y);
     }
     
-    IEnumerator MakeWire(GameObject port1, int targetPortType)
+
+    IEnumerator MakeWireProcess(GameObject port1)
     {
         GameObject wire = Instantiate(wireTemplate);
         WireScript wireScript = wire.GetComponent<WireScript>();
         GameObject potentialPort;
+        int targetPortType = 0;
+
+        if (port1.layer == 7)
+        {
+            wireScript.attachment1 = port1;
+            targetPortType = 8;
+        }
+        else
+        {
+            wireScript.attachment2 = port1;
+            targetPortType = 7;
+        }
 
         wireScript.attachment1 = port1;
 
@@ -70,7 +94,10 @@ public class MainScript : MonoBehaviour
             {
                 if (hit.transform.gameObject.layer == targetPortType)
                 {
-                    potentialPort = hit.transform.gameObject;
+                    if (hit.transform.parent != port1.transform.parent)
+                    {
+                        potentialPort = hit.transform.gameObject;
+                    }
                 }
             }
 
@@ -80,14 +107,20 @@ public class MainScript : MonoBehaviour
 
                 if (Input.GetMouseButtonDown(0))
                 {
-
-                    wireScript.attachment2 = potentialPort;
+                    if (targetPortType == 7)
+                    {
+                        wireScript.attachment1 = potentialPort;
+                    }
+                    else
+                    {
+                        wireScript.attachment2 = potentialPort;
+                    }
                     break;
                 }
             }
             else
             {
-                RenderWire(wire, port1.transform.position, Input.mousePosition);
+                RenderWire(wire, port1.transform.position, Camera.main.ScreenToWorldPoint(Input.mousePosition));
             }
 
             yield return null;
