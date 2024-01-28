@@ -7,7 +7,6 @@ using Unity.Mathematics;
 public class MainScript : MonoBehaviour
 {
     public static event Action<int> Stepped;
-    public static event Action<string> InputCommand;
     public GameObject wireTemplate;
     public List<GameObject> blockList;
 
@@ -26,7 +25,7 @@ public class MainScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        InputCommand += WhenSelfInputCommand;
+        BuildButtonBehavior.BuildBlockCommand += WhenBuildCommand;
     }
 
 
@@ -80,13 +79,9 @@ public class MainScript : MonoBehaviour
     }
 
     //Events:
-
-    void WhenSelfInputCommand(string cmd)
+    void WhenBuildCommand(GameObject targetBlock)
     {
-        if (cmd == "BuildBlock")
-        {
-
-        }
+        StartCoroutine(MakeBlockProcess(targetBlock));
     }
 
 

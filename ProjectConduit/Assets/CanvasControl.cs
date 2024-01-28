@@ -5,12 +5,12 @@ using TMPro;
 
 public class CanvasControl : MonoBehaviour
 {
-    public GameObject blockButton;
+    public GameObject blockButtonTemplate;
 
     // Start is called before the first frame update
     void Start()
     {
-        MainScript.InputCommand += WhenInputCommand;
+        InitializeBuildList();
     }
 
     // Update is called once per frame
@@ -21,11 +21,30 @@ public class CanvasControl : MonoBehaviour
 
     void WhenInputCommand(string cmd)
     {
-        InitializeBuildList();
+        
     }
     void InitializeBuildList()
     {
-        TabButton buttonFunc = blockButton.GetComponent<TabButton>();
-        
+        List<GameObject> blockList = GameObject.Find("Main Camera").GetComponent<MainScript>().blockList;
+        float Xcounter = 50;
+
+        foreach (GameObject block in blockList)
+        {
+            GameObject blockButton = Instantiate(blockButtonTemplate);
+            blockButton.transform.parent = transform.Find("BlockPanel");
+
+            blockButton.name = block.name + "Button";
+
+            RectTransform blockRect = blockButton.GetComponent<RectTransform>();
+            blockRect.localScale = new Vector3(1, 1, 1);
+            blockRect.position = new Vector2(Xcounter, 50);
+            Xcounter += blockRect.sizeDelta.x + 5;
+
+            BuildButtonBehavior blockScript = blockButton.GetComponent<BuildButtonBehavior>();
+            blockScript.blockTemplate = block;
+
+            TextMeshProUGUI blockText = blockButton.transform.Find("ButtonName").GetComponent<TextMeshProUGUI>();
+            blockText.text = block.name;
+        }
     }
 }
