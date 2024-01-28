@@ -153,8 +153,8 @@ public class MainScript : MonoBehaviour
                         wireScript.attachment1 = potentialPort;
                     }
 
-                    wireScript.attachment1.transform.parent.GetComponent<BlockScript>().outputPorts.Add(wire);
-                    wireScript.attachment2.transform.parent.GetComponent<BlockScript>().inputPorts.Add(wire);
+                    wireScript.attachment1.transform.parent.GetComponent<BlockScript>().outputPorts.Add(wireScript.attachment2.transform.parent.gameObject);
+                    wireScript.attachment2.transform.parent.GetComponent<BlockScript>().inputPorts.Add(wireScript.attachment1.transform.parent.gameObject);
                     break;
                 }
             }
