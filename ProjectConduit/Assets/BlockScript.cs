@@ -8,7 +8,6 @@ public class BlockScript : MonoBehaviour
     //AND GATE
     public int blockType;
     private GameObject light;
-
     public Dictionary<GameObject, GameObject> inputPorts = new Dictionary<GameObject, GameObject>();
     public Dictionary<GameObject, GameObject> outputPorts = new Dictionary<GameObject, GameObject>();
 
@@ -68,13 +67,13 @@ public class BlockScript : MonoBehaviour
        if (blockType == 1)
        {
             print("RESETLIGHT");
-            OutputBlock();
+            //OutputBlock();
        }
     }
 
     //Block functions:
 
-    void OutputBlock()
+    public void OutputBlock()
     {
         bool result = false;
         foreach (KeyValuePair<GameObject, GameObject> pr in inputPorts)
@@ -96,7 +95,6 @@ public class BlockScript : MonoBehaviour
             if (!pr.Key.GetComponent<WireScript>().powered)
             {
                 return false;
-                break;
             }
         }
 
@@ -110,7 +108,6 @@ public class BlockScript : MonoBehaviour
             if (pr.Key.GetComponent<WireScript>().powered)
             {
                 return true;
-                break;
             }
         }
 
@@ -119,12 +116,30 @@ public class BlockScript : MonoBehaviour
 
     bool NotGate()
     {
+        //Go with answer of majority, otherwise last wire
+
+        int litWires = 0;
+        int unlitWires = 0;
+
         bool answer = false;
         foreach (KeyValuePair<GameObject, GameObject> pr in inputPorts)
         {
+            if (pr.Key.GetComponent<WireScript>().powered) {
+                litWires++;
+            }
+            else
+            {
+                unlitWires++;
+            }
             answer = pr.Key.GetComponent<WireScript>().powered;
+
         }
 
-        return !answer;
+        if (litWires == unlitWires) {
+            return !answer;
+        }
+        else {
+            return (unlitWires > litWires);
+        }
     }
 }

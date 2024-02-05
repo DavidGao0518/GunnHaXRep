@@ -164,6 +164,10 @@ public class MainScript : MonoBehaviour
             {
                 nextBlocks.Add(block);
             }
+            else if (blockScript.blockType == 1)
+            {
+                blockScript.OutputBlock();
+            }
 
         }
 
