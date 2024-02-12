@@ -7,7 +7,9 @@ public class BlockScript : MonoBehaviour
 {
     //AND GATE
     public int blockType;
-    private GameObject light;
+    private GameObject outputLight;
+
+    //Wires, Block
     public Dictionary<GameObject, GameObject> inputPorts = new Dictionary<GameObject, GameObject>();
     public Dictionary<GameObject, GameObject> outputPorts = new Dictionary<GameObject, GameObject>();
 
@@ -16,15 +18,15 @@ public class BlockScript : MonoBehaviour
     {
         if (blockType == 1)
         {
-            light = transform.Find("Light").gameObject;
+            outputLight = transform.Find("Light").gameObject;
             MainScript.UpdateState += onUpdateState;
         }
 
         MainScript.Stepped += WhenStepped;
     }
-    void WhenStepped(GameObject Block)
+    public void WhenStepped(GameObject Block)
     {
-        if (this.gameObject == Block)
+        if (gameObject == Block)
         {
             bool result = false;
 
@@ -86,7 +88,7 @@ public class BlockScript : MonoBehaviour
             }
         }
 
-        light.SetActive(result);
+        outputLight.SetActive(result);
     }
     bool AndGate()
     {
