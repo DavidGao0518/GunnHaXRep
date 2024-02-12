@@ -85,7 +85,7 @@ public class MainScript : MonoBehaviour
                         else if (hit.transform.gameObject.layer == 9) //Blocks, edit block
                         {
                             print("testedit block");
-                            StartCoroutine(MakeWireProcess(hit.transform.gameObject));
+                            //StartCoroutine(MakeWireProcess(hit.transform.gameObject));
                         }
                     }
                 }
