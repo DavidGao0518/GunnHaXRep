@@ -30,7 +30,7 @@ public class CanvasControl : MonoBehaviour
         foreach (GameObject block in blockList)
         {
             GameObject blockButton = Instantiate(blockButtonTemplate);
-            blockButton.transform.parent = transform.Find("BlockPanel");
+            blockButton.transform.SetParent(transform.Find("BlockPanel"));
 
             blockButton.name = block.name + "Button";
 

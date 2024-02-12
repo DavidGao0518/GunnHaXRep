@@ -63,5 +63,9 @@ PrefabInstance:
       propertyPath: m_Name
       value: NOTGate
       objectReference: {fileID: 0}
+    - target: {fileID: 1201555024853889599, guid: 1853598a60a016e41a4d30f3030633ff, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1853598a60a016e41a4d30f3030633ff, type: 3}

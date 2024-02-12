@@ -84,13 +84,13 @@ public class MainScript : MonoBehaviour
                         }
                         else if (hit.transform.gameObject.layer == 9) //Blocks, edit block
                         {
+                            print("testedit block");
                             StartCoroutine(MakeWireProcess(hit.transform.gameObject));
                         }
                     }
                 }
                 else if (Input.GetMouseButtonDown(1))
                 {
-
                     print("Clicked right");
                     print(hit.transform);
 
@@ -104,7 +104,7 @@ public class MainScript : MonoBehaviour
                         }
                         else if (hit.transform.gameObject.layer == 9) //Blocks, delete
                         {
-
+                            ClearBlock(hit.transform.gameObject);
                         }
                     }
                 }
@@ -132,7 +132,6 @@ public class MainScript : MonoBehaviour
         List<GameObject> allWires = new List<GameObject>();
 
         List<GameObject> allBlocks = new List<GameObject>();
-        bool running = true;
         
         //Clear indicators
         foreach (GameObject indicator in stepIndicators)
@@ -163,6 +162,10 @@ public class MainScript : MonoBehaviour
             if (blockScript.blockType == 0)
             {
                 nextBlocks.Add(block);
+            }
+            else if (blockScript.blockType == 1)
+            {
+                blockScript.OutputBlock();
             }
 
         }
@@ -221,7 +224,10 @@ public class MainScript : MonoBehaviour
         foreach (GameObject block in lastBlocks)
         {
             BlockScript blockScript = block.GetComponent<BlockScript>();
-            Stepped?.Invoke(block);
+            print(block);
+            if (block != null) {
+                Stepped?.Invoke(block);
+            }
 
             atEnd = false;
 
@@ -272,6 +278,7 @@ public class MainScript : MonoBehaviour
         wireScript.attachment1.GetComponent<BlockScript>().outputPorts.Remove(wire);
         wireScript.attachment2.GetComponent<BlockScript>().inputPorts.Remove(wire);
         Destroy(wire);
+        ResetCircult();
     }
     IEnumerator MakeWireProcess(GameObject port1)
     {
@@ -281,7 +288,7 @@ public class MainScript : MonoBehaviour
         GameObject parentBlock = port1.transform.parent.gameObject;
         int targetPortType = 0;
 
-        wire.transform.parent = wireFolder.transform;
+        wire.transform.SetParent(wireFolder.transform);
 
         if (port1.layer == 7)
         {
@@ -362,6 +369,21 @@ public class MainScript : MonoBehaviour
     }
     void ClearBlock(GameObject block)
     {
+        foreach (KeyValuePair<GameObject, GameObject> pair in block.GetComponent<BlockScript>().inputPorts) {
+            BlockScript targetBlockScript = pair.Value.GetComponent<BlockScript>();
+            targetBlockScript.outputPorts.Remove(pair.Key);
+            Destroy(pair.Key);
+        }
+
+        foreach (KeyValuePair<GameObject, GameObject> pair in block.GetComponent<BlockScript>().outputPorts) {
+            BlockScript targetBlockScript = pair.Value.GetComponent<BlockScript>();
+            targetBlockScript.inputPorts.Remove(pair.Key);
+            Destroy(pair.Key);
+        }
+
+        Stepped -= block.GetComponent<BlockScript>().WhenStepped;
+        Destroy(block);
+        ResetCircult();
         //to do
     }
     IEnumerator MakeBlockProcess(GameObject blockTemplate)
@@ -369,7 +391,7 @@ public class MainScript : MonoBehaviour
         GameObject block = Instantiate(blockTemplate);
         block.name = blockTemplate.name;
 
-        block.transform.parent = blockFolder.transform;
+        block.transform.SetParent(blockFolder.transform);
 
         userState = true;
         canvas.gameObject.SetActive(false);
