@@ -2,10 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
+using UnityEngine.UIElements;
+using Microsoft.Unity.VisualStudio.Editor;
+using UnityEditor.UI;
 
 public class CanvasControl : MonoBehaviour
 {
     public GameObject blockButtonTemplate;
+
+    public List<Texture2D> blockTextures;
 
     // Start is called before the first frame update
     void Start()
@@ -25,7 +31,7 @@ public class CanvasControl : MonoBehaviour
     void InitializeBuildList()
     {
         List<GameObject> blockList = GameObject.Find("Main Camera").GetComponent<MainScript>().blockList;
-        float Xcounter = 50;
+        float Xcounter = -345;//blockButtonTemplate.GetComponent<RectTransform>().sizeDelta.x;
 
         foreach (GameObject block in blockList)
         {
@@ -36,7 +42,7 @@ public class CanvasControl : MonoBehaviour
 
             RectTransform blockRect = blockButton.GetComponent<RectTransform>();
             blockRect.localScale = new Vector3(1, 1, 1);
-            blockRect.position = new Vector2(Xcounter, 50);
+            blockRect.localPosition = new Vector2(Xcounter, -15); //Why offset? IDK
             Xcounter += blockRect.sizeDelta.x + 5;
 
             BuildButtonBehavior blockScript = blockButton.GetComponent<BuildButtonBehavior>();
