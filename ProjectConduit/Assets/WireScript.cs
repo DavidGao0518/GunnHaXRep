@@ -9,12 +9,12 @@ public class WireScript : MonoBehaviour
     public GameObject attachment2;
     public bool powered;
 
-    private GameObject litWire;
+    public GameObject litWire;
 
     // Start is called before the first frame update
     void Start()
     {
-        litWire = transform.Find("PoweredWire").gameObject;
+        //litWire = transform.Find("PoweredWire").gameObject;
         MainScript.UpdateState += onUpdateState;
     }
 
