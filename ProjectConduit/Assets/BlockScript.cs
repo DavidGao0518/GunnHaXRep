@@ -7,6 +7,9 @@ public class BlockScript : MonoBehaviour
 {
     //AND GATE
     public int blockType;
+    public bool active = false;
+
+    private GameObject switchButton;
     private GameObject outputLight;
 
     //Wires, Block
@@ -16,7 +19,10 @@ public class BlockScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if (blockType == 1)
+        if (blockType == 0) {
+            switchButton = transform.Find("StartSwitchButton").gameObject;
+        }
+        else if (blockType == 1)
         {
             outputLight = transform.Find("Light").gameObject;
             MainScript.UpdateState += onUpdateState;
@@ -32,7 +38,7 @@ public class BlockScript : MonoBehaviour
 
             if (blockType == 0) //Start block
             {
-                result = true;
+                result = active;
             }
             else if (blockType == 1) //Output block
             {

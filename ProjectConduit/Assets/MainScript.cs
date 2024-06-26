@@ -14,7 +14,7 @@ public class MainScript : MonoBehaviour
     public List<GameObject> blockList;
     public Canvas canvas;
 
-    public bool userState = false;
+    public bool userState = true;
     public bool UIState = false;
     public bool running;
 
@@ -51,7 +51,7 @@ public class MainScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!userState) //Is actually doing something
+        if (userState) //Is actually doing something
         {
             RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
 
@@ -74,7 +74,18 @@ public class MainScript : MonoBehaviour
                     {
                         Debug.Log(hit.transform.name);
 
-                        if (hit.transform.gameObject.layer == 7) //Gates, make wire
+                        if (hit.transform.gameObject.layer == 10) { //Clickable
+                            print("Clicked Button");
+                            print(hit.transform.name);
+
+                            if (hit.transform.name == "StartSwitchButton") {
+                                BlockScript startBlockScript = hit.transform.GetComponentInParent<BlockScript>();
+
+                                startBlockScript.active = !startBlockScript.active;
+                                hit.transform.Find("ButtonOn").gameObject.SetActive(startBlockScript.active);
+                            }
+                        }
+                        else if (hit.transform.gameObject.layer == 7) //Gates, make wire
                         {
                             StartCoroutine(MakeWireProcess(hit.transform.gameObject));
                         }
@@ -122,9 +133,9 @@ public class MainScript : MonoBehaviour
     {
         print("Reset circult");
         statusText.text = "Status: Cleared";
-        ResetCircult();
+        ResetCircuit();
     }
-    void ResetCircult()
+    void ResetCircuit()
     {
         step = 1;
         nextBlocks = new List<GameObject>();
@@ -170,11 +181,14 @@ public class MainScript : MonoBehaviour
 
         }
 
-        UpdateState.Invoke(false);
+        userState = true;
+        if (UpdateState != null) {
+            UpdateState.Invoke(false);
+        }
     }
     IEnumerator OnRun(InputValue action)
     {
-        ResetCircult();
+        ResetCircuit();
         print("Run");
 
         userState = false;
@@ -200,6 +214,7 @@ public class MainScript : MonoBehaviour
 
     bool OnStep()
     {
+        userState = false;
         List<GameObject> allBlocks = new List<GameObject>();
         bool atEnd = true;
 
@@ -252,7 +267,7 @@ public class MainScript : MonoBehaviour
 
         if (atEnd && !running)
         {
-            ResetCircult();
+            ResetCircuit();
             statusText.text = "Status: Cleared";
         }
 
@@ -278,7 +293,7 @@ public class MainScript : MonoBehaviour
         wireScript.attachment1.GetComponent<BlockScript>().outputPorts.Remove(wire);
         wireScript.attachment2.GetComponent<BlockScript>().inputPorts.Remove(wire);
         Destroy(wire);
-        ResetCircult();
+        ResetCircuit();
     }
     IEnumerator MakeWireProcess(GameObject port1)
     {
@@ -303,9 +318,9 @@ public class MainScript : MonoBehaviour
             targetPortType = 7;
         }
 
-        userState = true;
+        userState = false;
 
-        while (userState)
+        while (!userState)
         {
             yield return null;
             potentialPort = null;
@@ -365,7 +380,7 @@ public class MainScript : MonoBehaviour
             }
         }
 
-        userState = false;
+        userState = true;
     }
     void ClearBlock(GameObject block)
     {
@@ -383,7 +398,7 @@ public class MainScript : MonoBehaviour
 
         Stepped -= block.GetComponent<BlockScript>().WhenStepped;
         Destroy(block);
-        ResetCircult();
+        ResetCircuit();
         //to do
     }
     IEnumerator MakeBlockProcess(GameObject blockTemplate)
@@ -393,10 +408,10 @@ public class MainScript : MonoBehaviour
 
         block.transform.SetParent(blockFolder.transform);
 
-        userState = true;
+        userState = false;
         canvas.gameObject.SetActive(false);
 
-        while (userState)
+        while (!userState)
         {
             yield return null;
             Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -409,6 +424,6 @@ public class MainScript : MonoBehaviour
         }
 
         canvas.gameObject.SetActive(true);
-        userState = false;
+        userState = true;
     }
 }
